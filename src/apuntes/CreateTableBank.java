@@ -11,7 +11,7 @@ import com.mysql.cj.protocol.Resultset;
 
 public class CreateTableBank {
    // Attributes
-   String driver = "com.mysql.jdbc.Driver";
+   String driver = "com.mysql.cj.jdbc.Driver";
    String url = "jdbc:mysql://localhost:3306/bank";
    String login = "root";
    String password = "";
@@ -77,6 +77,7 @@ public class CreateTableBank {
          ResultSet vista = statement.executeQuery(createSelect);
          java.sql.ResultSetMetaData datosVista = vista.getMetaData();
          System.out.println("El nombre de la tabla es: " + datosVista.getTableName(1));
+         System.out.println("Número de filas: " + vista.getFetchSize());
          while (vista.next()) {
             for (int i = 1; i <= datosVista.getColumnCount(); i++) {
                System.out.print("[" + datosVista.getColumnName(i) + " : " + vista.getString(i) + "] ");
