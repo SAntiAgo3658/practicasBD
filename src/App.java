@@ -10,14 +10,15 @@ public class App {
         
         MiCRUD prueba = new MiCRUD("bank");
 
-        MyColumn[] columnas = new MyColumn[2];
+        MyColumn[] columnas = new MyColumn[1];
         columnas[0] = new MyColumn();
         columnas[0].setColName("nombre");
         columnas[0].setColType("varchar(32)");
-        MyConstraint[] restricciones = new MyConstraint[5];
+        MyConstraint[] restricciones = new MyConstraint[1];
+        restricciones[0] = new MyConstraint(true);
+        restricciones[0].setParams(new String[] {"pk_nombre", "nombre"});
         
-        System.out.println(prueba.createTable("mi tabla", columnas , null));
-        
+        System.out.println(prueba.createTable("mi tabla", columnas , restricciones));
 
     }
 }
