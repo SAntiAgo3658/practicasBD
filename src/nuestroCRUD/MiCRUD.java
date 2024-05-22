@@ -2,6 +2,8 @@ package nuestroCRUD;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -24,6 +26,7 @@ public class MiCRUD {
          Class.forName(DRIVER);
          return true;
       } catch (ClassNotFoundException e) {
+         System.out.println(e.getMessage());
          return false;
       }
    }
@@ -34,7 +37,9 @@ public class MiCRUD {
          this.connection = DriverManager.getConnection(url, user, password);
          return true;
       } catch (SQLException e) {
+         System.out.println(e.getMessage());
          return false;
+
       }
    }
 
@@ -51,37 +56,31 @@ public class MiCRUD {
 
    public boolean createStatement() {
       try {
-         this.statement = connection.createStatement();
+         this.statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
          return true;
       } catch (SQLException e) {
          return false;
       } catch (NullPointerException e) {
-         return false;
-      }
-   }
-
-   public boolean useStatemente(String query) {
-      try {
-         return (0 == this.statement.executeUpdate(query));
-      } catch (SQLException e) {
+         e.getMessage();
          return false;
       }
    }
 
    // create
-   public String createTable(String name, MyColumn[] columns, MyConstraint[] constraints) {
+   public boolean createTable(String name, MyColumn[] columns, MyConstraint[] constraints) {
+
       if (columns == null || constraints == null) {
-         return null;
+         return false;
       } else {
          for (MyColumn colActual : columns) {
             if (colActual == null) {
-               return null;
+               return false;
 
             }
 
             for (MyConstraint constraintActual : constraints) {
                if (constraintActual == null) {
-                  return null;
+                  return false;
 
                }
 
@@ -139,10 +138,126 @@ public class MiCRUD {
 
       myQuery = myQuery + ");";
 
-      return myQuery;
+      try {
+         return (0 == this.statement.executeUpdate(myQuery));
+      } catch (SQLException e) {
+         return false;
+      }
 
    }
+   
    // read
+
+   public String[] readBD(String[] select, String[] from, String where) {
+
+
+      if (select == null || from == null) {
+         return null;
+
+      } else {
+         for (String string : select) {
+            if (string == null) {
+               return null;
+
+            }
+
+         }
+
+         for (String string : from) {
+            if (string == null) {
+               return null;
+
+            }
+
+         }
+
+      }
+
+      String myQuery = "SELECT ";
+      for (int i = 0; i < select.length - 1; i++) {
+         myQuery = myQuery + select[i] + ", ";
+
+      }
+
+      myQuery = myQuery + select[select.length - 1] + " ";
+
+      myQuery = myQuery + "FROM ";
+
+      for (int i = 0; i < from.length - 1; i++) {
+         myQuery = myQuery + from[i] + ", ";
+
+      }
+
+      myQuery = myQuery + from[from.length - 1];
+
+      if (where != null) {
+         myQuery = myQuery + " WHERE " + where + ";";
+
+      } else {
+         myQuery = myQuery + ";";
+      }
+
+      try {
+         ResultSet resultSet = this.statement.executeQuery(myQuery);
+
+         int numRows = 0;
+         ResultSetMetaData metaData = resultSet.getMetaData();
+         int numCols = metaData.getColumnCount();
+
+         while (resultSet.next()) {
+            numRows = resultSet.getRow();
+
+         }
+
+         String[] vista = new String[numRows];
+         resultSet.beforeFirst();
+
+         for (int i = 0; i < vista.length; i++) {
+            resultSet.next();
+            vista[i] = "";
+            for (int j = 1; j < numCols; j++) {
+               vista[i] = vista[i] + resultSet.getString(j) + " / ";
+            }
+
+            vista[i] = vista[i] + resultSet.getString(numCols);
+
+         }
+
+         return vista;
+
+      } catch (SQLException e) {
+         return null;
+
+      }
+
+   }
+   
    // update
    // delete
+
+   public int deleteRows(String table, String condition) {
+
+      String query = "DELETE FROM " + table + " WHERE " + condition + ";";
+
+      try {
+         return (this.statement.executeUpdate(query));
+
+      } catch (SQLException e) {
+         return -1;
+
+      }
+
+   }
+
+   public boolean dropTable(String table) {
+
+      try {
+         this.statement.executeUpdate("DROP TABLE " + table + ";" );
+         return true;
+      } catch (SQLException e) {
+         return false;
+      }
+
+   }
+
 }

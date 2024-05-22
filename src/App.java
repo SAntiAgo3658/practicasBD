@@ -1,42 +1,36 @@
-import java.sql.SQLException;
-
-import apuntes.CreateTableBank;
 import nuestroCRUD.MiCRUD;
 import nuestroCRUD.MyColumn;
 import nuestroCRUD.MyConstraint;
 
 public class App {
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        
-        MiCRUD miCRUD = new MiCRUD("bank");
+    public static void main(String[] args) {
 
-        MyColumn[] columnas = new MyColumn[2];
-        columnas[0] = new MyColumn();
-        columnas[0].setColName("nombre");
-        columnas[0].setColType("varchar(32)");
-        columnas[1] = new MyColumn();
-        columnas[1].setColName("apellido");
-        columnas[1].setColType("varchar(32)");
-        columnas[1].setNulleable(true);
-        MyConstraint[] restricciones = new MyConstraint[3];
-        restricciones[0] = new MyConstraint(true);
-        restricciones[0].setParams(new String[] {"pk_nombre", "nombre"});
+        MiCRUD miCRUD = new MiCRUD("ferreteria");
 
         miCRUD.initDriver();
         miCRUD.initConnection();
         miCRUD.createStatement();
-        String miQuery = miCRUD.createTable("enfermos", columnas, restricciones);
+
+        MyColumn[] columns = new MyColumn[1];
+        columns[1].setColName("lsk");
+        columns[1].setColType("varchar(30)");
+
+        MyConstraint constraint =  new MyConstraint(true);
         
-        if (miCRUD.useStatemente(miQuery)) {
-            System.out.println("Creada tabla");
-            
-        } else {
-            System.out.println("ERROR!!");
+
+
+
+        String[] vista = miCRUD.readBD(new String[] { "cliente.nombre as cliente", "empleado.nombre as empleado" },
+                new String[] { "cliente", "empleado", "asesora" },
+                "(cliente.id_cliente = asesora.id_cliente) AND (asesora.id_empleado = empleado.dni)");
+
+        for (String string : vista) {
+            System.out.println(string);
+
         }
 
-        
-        
         miCRUD.closeConnection();
 
     }
+
 }
